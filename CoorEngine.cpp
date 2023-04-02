@@ -7,6 +7,12 @@
 #include "MainLinLayout.cpp"
 #include "ColorfullCoordinatSystemWindow.cpp"
 
+CoorEngine::CoorEngine() 
+    : AbstractAppData(NULL, "..\\TESTWIN32_GRAPHICAPP\\x64\\Debug") 
+{
+    appName = "Gradient Descent";
+};
+
 void CoorEngine::onCreate(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     MainWindow* mainWnd = new MainWindow(this);
