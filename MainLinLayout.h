@@ -92,7 +92,5 @@ struct MainLinLayout : LinearLayout
     virtual void onMessageRecieve(const char* name, void* data) override;
 
     virtual void draw() override;
-    virtual int onEnterWindowSizeMove() override;
-    virtual int onExitWindowSizeMove() override;
     virtual int onSize(Vector managerSize, Rect _newRect) override;
 };

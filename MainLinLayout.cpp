@@ -144,20 +144,9 @@ void MainLinLayout::initDownLinLayout()
 void MainLinLayout::draw()
 {
     int timeBefore = clock();
-    Window::draw();
-    bool isMainWindowMoving = app->isWindowMoving();
-    if (!isMainWindowMoving)
-    {
 
-        LinearLayout::draw();
-    }
-    else
-    {
-        Vector copySize = onWindowMovingCopyDC.getSize(); 
-        M_HDC& _outputDC = *getOutputDC();
-        Vector currSize = _outputDC.getSize();
-        app->stretchBlt(_outputDC, { .pos = {}, .finishPos = currSize }, onWindowMovingCopyDC, { .pos = {}, .finishPos = copySize });
-    }
+    LinearLayout::draw();
+
     int timeAfter = clock();
     int delta = timeAfter - timeBefore;
 
@@ -228,30 +217,6 @@ void MainLinLayout::onCertainPointSelection(Vector clickedCellPos)
     if(wasAnswerFinded) countFncOnTopSystem(answerK, answerB, suggestedFncColor);
     countFncOnTopSystem(clickedCellPos.x, clickedCellPos.y, userSelectedFncColor);
     invalidateButton();
-}
-
-int MainLinLayout::onEnterWindowSizeMove()
-{
-    int res = LinearLayout::onEnterWindowSizeMove();
-
-    M_HDC& outputDC = *getOutputDC();
-    Vector currSize = outputDC.getSize();
-
-    onWindowMovingCopyDC.setSize(currSize, app);
-    app->bitBlt(onWindowMovingCopyDC, {}, outputDC);
-
-    //cout << "onEnterWindowSizeMove|CopySize:" << currSize.getStr() << endl;
-
-
-    return res;
-}
-
-int MainLinLayout::onExitWindowSizeMove()
-{
-    int res = LinearLayout::onExitWindowSizeMove();
-    invalidateButton();
-
-    return res;
 }
 
 int MainLinLayout::onSize(Vector managerSize, Rect _newRect)
