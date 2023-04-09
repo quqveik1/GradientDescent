@@ -33,7 +33,7 @@ MainLinLayout::MainLinLayout(AbstractAppData* _app, Vector _startPos) :
 
     initDownLinLayout();
 
-    startGradientComputation();
+    startMonteCarloComputation();
 }
 
 void MainLinLayout::initCoordinats()
@@ -212,10 +212,10 @@ void MainLinLayout::startGradientDescent(Vector _startPos)
 
 void MainLinLayout::onCertainPointSelection(Vector clickedCellPos)
 {
-    topSystem.clearSys();
+    topSystem.clearLay(suggestedOddsLayIndex);
     countOriginalFnc();
-    if(wasAnswerFinded) countFncOnTopSystem(answerK, answerB, suggestedFncColor);
-    countFncOnTopSystem(clickedCellPos.x, clickedCellPos.y, userSelectedFncColor);
+    if(wasAnswerFinded) computeFncOnTopSystem(answerK, answerB, suggestedFncColor);
+    computeFncOnTopSystem(clickedCellPos.x, clickedCellPos.y, userSelectedFncColor);
     invalidateButton();
 }
 
@@ -332,7 +332,7 @@ void MainLinLayout::threadCoeffFinder(double* k, double* b, Vector& kBound, Vect
         }
     }
     wasAnswerFinded = true;
-    countFncOnTopSystem(*k, *b, suggestedFncColor);
+    computeFncOnTopSystem(*k, *b, suggestedFncColor);
 
     invalidateButton();
     cout << "FinishedCountGraientMap\n";
@@ -371,10 +371,10 @@ double MainLinLayout::calcQuadratic(double k, double b, double x, double(*fnc)(d
 
 void MainLinLayout::countOriginalFnc()
 {
-    countFncOnTopSystem(currOriginalK, currOriginalB);
+    computeOriginalFunction(currOriginalK, currOriginalB);
 };
 
-void MainLinLayout::countFncOnTopSystem(double k, double b, COLORREF _color/* = NULL*/)
+void MainLinLayout::computeFncOnTopSystem(double k, double b, COLORREF _color/* = NULL*/)
 {
     Vector topCellXBound = topSystem.getXCellBound();
     double topCellXBoundLen = topCellXBound.delta();
@@ -383,25 +383,42 @@ void MainLinLayout::countFncOnTopSystem(double k, double b, COLORREF _color/* = 
     for (double x = topCellXBound.x; x < topCellXBound.y; x += xDelta)
     {
         if (!app->getAppCondition()) break;
+        double randomNoise = app->generateRandom(-1, 1, 2);
         double fncRes = sinFnc(k, b, x);
         Vector newPoint = { x, fncRes };
-        topSystem.addPoint(newPoint, _color);
+        topSystem.addPoint(newPoint, _color, 0, suggestedOddsLayIndex, false);
     }
     invalidateButton();
 }
 
+void MainLinLayout::computeOriginalFunction(double k, double b, COLORREF _color/* = NULL*/)
+{
+    Vector topCellXBound = topSystem.getXCellBound();
+    double topCellXBoundLen = topCellXBound.delta();
+    double xDelta = abs(topCellXBoundLen / 1000);
 
-void MainLinLayout::startGradientComputation()
+    for (double x = topCellXBound.x; x < topCellXBound.y; x += xDelta)
+    {
+        if (!app->getAppCondition()) break;
+        double randomNoise = app->generateRandom(-1, 1, 2);
+        double fncRes = sinFnc(k, b, x) + randomNoise;
+        Vector newPoint = { x, fncRes };
+        topSystem.addPoint(newPoint, _color, 0, originalLayIndex, false);
+    }
+    invalidateButton();
+
+}
+
+
+void MainLinLayout::startMonteCarloComputation()
 {
     int timeStart = clock();
 
     //countGradientMap();
-
-    thread executeThread(&MainLinLayout::countGradientMap, this);
-    executeThread.detach();
-
-    thread originalFncThread(&MainLinLayout::countOriginalFnc, this);
-    originalFncThread.detach();
+    countOriginalFnc();
+    countGradientMap();
+    //thread executeThread(&MainLinLayout::countGradientMap, this);
+    //executeThread.detach();
 
     int timeFinish = clock();
 

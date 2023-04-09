@@ -10,8 +10,8 @@
 
 struct MainLinLayout : LinearLayout
 {
-    ColorfullCoordinatSystemWindow topSystem = NULL;
-    MultiLayCoordinatSystemWindow bottomSystem = NULL;
+    MultiLayCoordinatSystemWindow topSystem;
+    MultiLayCoordinatSystemWindow bottomSystem;
     COLORREF suggestedFncColor = C_LIGHTRED;
     COLORREF userSelectedFncColor = C_GREEN;
     Vector downLineSize = {};
@@ -32,6 +32,9 @@ struct MainLinLayout : LinearLayout
     TextView suggestedCoeff;
     TextView answerCoeff;
     GraphicInfoButton graphicInfoButton;
+
+    size_t originalLayIndex = 0;
+    size_t suggestedOddsLayIndex = 1;
 
     static double currOriginalK;
     static double currOriginalB;
@@ -63,9 +66,6 @@ struct MainLinLayout : LinearLayout
 
     MainLinLayout(AbstractAppData* _app, Vector _startPos);
 
-    //void setTopSystem(ColorfullCoordinatSystemWindow* _wnd) { topSystem = _wnd; };
-    //void setBottomSystem(ColorfullCoordinatSystemWindow* _wnd) { bottomSystem = _wnd; };
-
     void initCoordinats();
     void initDescribtions();
     void initDownLinLayout();
@@ -83,10 +83,11 @@ struct MainLinLayout : LinearLayout
 
     void threadCoeffFinder(double* k, double* b, Vector& kBound, Vector& bBound, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x));
     void changeAndPrintNewMaxOrMinDelta(double* curminMaxDelta, double currDelta, int* currIndex, COLORREF color);
-    void startGradientComputation();
+    void startMonteCarloComputation();
     void countGradientMap();
     void countOriginalFnc();
-    void countFncOnTopSystem(double k, double b, COLORREF _color = NULL);
+    void computeOriginalFunction(double k, double b, COLORREF _color = NULL);
+    void computeFncOnTopSystem(double k, double b, COLORREF _color = NULL);
     void onCertainPointSelection(Vector clickedCellP);
 
     virtual void onMessageRecieve(const char* name, void* data) override;
