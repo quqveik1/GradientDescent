@@ -36,11 +36,16 @@ struct MainLinLayout : LinearLayout
     size_t originalLayIndex = 0;
     size_t suggestedOddsLayIndex = 1;
 
+    size_t gradientLay = 0;
+
     static double currOriginalK;
     static double currOriginalB;
 
     int cCountingCoef = 100000;
     int cQuadraticDeltaCountingPoints = 100;
+
+    int cOriginalPoints = 1000;
+    int computingQuadraticDeltaPointsIncrementDelta = 5;
 
     double answerK = 0;
     double answerB = 0;
@@ -74,14 +79,19 @@ struct MainLinLayout : LinearLayout
     static double sinFnc(double k, double b, double x);
 
     double calcQuadratic(double k, double b, double x, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x));
+    double calcQuadratic(double k, double b, size_t xIndex, double(*fnc)(double k, double b, double x), MultiLayCoordinatSystemWindow& lay);
+    
     double calcTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x), double start, double finish, double step);
+    double calcTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), int start, int finish, int step, MultiLayCoordinatSystemWindow& lay);
     double calcAndPrintTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x), double start, double finish, double step);
+    double calcAndPrintTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), int start, int finish, int step, MultiLayCoordinatSystemWindow& lay);
 
     void startGradientDescent(Vector _startPos);
 
     COLORREF getQuadraticDeltaColor(double quadraticDelta);
 
     void threadCoeffFinder(double* k, double* b, Vector& kBound, Vector& bBound, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x));
+    void threadCoeffFinderWithUnknownFnc(double* k, double* b, Vector& kBound, Vector& bBound, double(*fnc)(double k, double b, double x));
     void changeAndPrintNewMaxOrMinDelta(double* curminMaxDelta, double currDelta, int* currIndex, COLORREF color);
     void startMonteCarloComputation();
     void countGradientMap();

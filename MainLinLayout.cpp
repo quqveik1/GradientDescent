@@ -50,6 +50,7 @@ void MainLinLayout::initCoordinats()
     topSystem.setLayoutInfo(topInfo);
 
     topSystem.setMatchParentX(true);
+    topSystem.addLay();
     addWindow(topSystem);
 
 
@@ -179,24 +180,24 @@ void MainLinLayout::onMessageRecieve(const char* name, void* data)
 
 void MainLinLayout::startGradientDescent(Vector _startPos)
 {
+    static bool isWorking = false;
+    if (isWorking) return;
+    isWorking = true;
     bottomSystem.clearLay(gradientCoorBottomSystemIndex);
     gradientDescentPos = _startPos;
-    Vector topCellXBound = topSystem.getXCellBound();
-
-    double topCellXBoundLen = topCellXBound.delta();
-
-    double xDelta = abs(topCellXBoundLen / cQuadraticDeltaCountingPoints);
 
     bottomSystem.addPoint(gradientDescentPos, gradientDescentColor, gradientDescentR, gradientCoorBottomSystemIndex);
 
-    Vector learning_rate = {0.001, 0.00001};
+    int finishPos = (int)topSystem.getCoordinatLay(gradientLay)->size();
+
+    Vector learning_rate = {0.0001, 0.000001};
     int iterations = 100;
     for (int i = 0; i < iterations; i++)
     {
         if (app->getAppCondition() == 0) break;
-        double currQuadraticDelta = calcTotalQuadratic(gradientDescentPos.x,                   gradientDescentPos.y,                   sinFnc, originalSinFnc, topCellXBound.x, topCellXBound.y, xDelta);
-        double dxQuadraticDelta =   calcTotalQuadratic(gradientDescentPos.x + gradientDelta.x, gradientDescentPos.y,                   sinFnc, originalSinFnc, topCellXBound.x, topCellXBound.y, xDelta);
-        double dyQuadraticDelta =   calcTotalQuadratic(gradientDescentPos.x,                   gradientDescentPos.y + gradientDelta.y, sinFnc, originalSinFnc, topCellXBound.x, topCellXBound.y, xDelta);
+        double currQuadraticDelta = calcTotalQuadratic(gradientDescentPos.x,                   gradientDescentPos.y,                   sinFnc, 0, finishPos, computingQuadraticDeltaPointsIncrementDelta, topSystem);
+        double dxQuadraticDelta =   calcTotalQuadratic(gradientDescentPos.x + gradientDelta.x, gradientDescentPos.y,                   sinFnc, 0, finishPos, computingQuadraticDeltaPointsIncrementDelta, topSystem);
+        double dyQuadraticDelta =   calcTotalQuadratic(gradientDescentPos.x,                   gradientDescentPos.y + gradientDelta.y, sinFnc, 0, finishPos, computingQuadraticDeltaPointsIncrementDelta, topSystem);
         
         double xDerivative = (dxQuadraticDelta - currQuadraticDelta) / gradientDelta.x;
         double yDerivative = (dyQuadraticDelta - currQuadraticDelta) / gradientDelta.y;
@@ -207,6 +208,7 @@ void MainLinLayout::startGradientDescent(Vector _startPos)
         bottomSystem.addPoint(gradientDescentPos, gradientDescentColor, gradientDescentR, gradientCoorBottomSystemIndex);
     }
 
+    isWorking = false;
     cout << "gradientDescentPos: " << gradientDescentPos << endl;
 }
 
@@ -282,6 +284,17 @@ double MainLinLayout::calcTotalQuadratic(double k, double b, double(*fnc)(double
     return answer;
 }
 
+double MainLinLayout::calcTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), int start, int finish, int step, MultiLayCoordinatSystemWindow& lay)
+{
+    double answer = 0;
+    for (int index = start; index < finish; index += step)
+    {
+        double quadraticDelta = calcQuadratic(k, b, index, fnc, lay);
+        answer += quadraticDelta;
+    }
+    return answer;
+}
+
 double MainLinLayout::calcAndPrintTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x), double start, double finish, double step)
 {
     double currQuadraticDelta = 0;
@@ -289,7 +302,19 @@ double MainLinLayout::calcAndPrintTotalQuadratic(double k, double b, double(*fnc
     currQuadraticDelta = calcTotalQuadratic(k, b, fnc, originalFnc, start, finish, step);
     COLORREF quadraticDeltaColor = getQuadraticDeltaColor(currQuadraticDelta);
     Vector point = { k, b };
-    bottomSystem.addPoint(point, quadraticDeltaColor, 0, 0, false);
+    bottomSystem.addPoint(point, quadraticDeltaColor, 0, gradientLay, false);
+
+    return currQuadraticDelta;
+}
+
+double MainLinLayout::calcAndPrintTotalQuadratic(double k, double b, double(*fnc)(double k, double b, double x), int start, int finish, int step, MultiLayCoordinatSystemWindow& lay)
+{
+    double currQuadraticDelta = 0;
+
+    currQuadraticDelta = calcTotalQuadratic(k, b, fnc, start, finish, step, lay);
+    COLORREF quadraticDeltaColor = getQuadraticDeltaColor(currQuadraticDelta);
+    Vector point = { k, b };
+    bottomSystem.addPoint(point, quadraticDeltaColor, 0, gradientLay, false);
 
     return currQuadraticDelta;
 }
@@ -338,11 +363,53 @@ void MainLinLayout::threadCoeffFinder(double* k, double* b, Vector& kBound, Vect
     cout << "FinishedCountGraientMap\n";
 }
 
+void MainLinLayout::threadCoeffFinderWithUnknownFnc(double* k, double* b, Vector& kBound, Vector& bBound, double(*fnc)(double k, double b, double x))
+{
+    int detalisationK = 1000;
+    int kDelta = (int)abs(kBound.delta()) * detalisationK;
+    double kStart = kBound.x * detalisationK;
+
+    int bDelta = (int)(abs(bBound.delta()) * (double)detalisationK);
+    double bStart = bBound.x * detalisationK;
+
+    int finishPos = (int)topSystem.getCoordinatLay(originalLayIndex)->size();
+
+
+    for (int i = 0; i < cCountingCoef; i++)
+    {
+        if (!app->getAppCondition()) break;
+        double _k = ((rand() % kDelta) + kStart) / detalisationK;
+        double _b = ((rand() % bDelta) + bStart) / detalisationK;
+
+        double currQuadraticDelta = calcAndPrintTotalQuadratic(_k, _b, fnc, 0, finishPos, computingQuadraticDeltaPointsIncrementDelta, topSystem);
+
+        scoped_lock lock1(maxQuadraticDeltaMutex);
+        scoped_lock lock2(minQuadraticDeltaMutex);
+        if (isSmaller(maxQuadraticDelta, currQuadraticDelta))
+        {
+            changeAndPrintNewMaxOrMinDelta(&maxQuadraticDelta, currQuadraticDelta, &maxQuadraticDeltaIndex, maxDeltaColor);
+        }
+
+        if (isBigger(minQuadraticDelta, currQuadraticDelta))
+        {
+            *k = _k;
+            *b = _b;
+
+            changeAndPrintNewMaxOrMinDelta(&minQuadraticDelta, currQuadraticDelta, &minQuadraticDeltaIndex, minDeltaColor);
+        }
+    }
+    wasAnswerFinded = true;
+    computeFncOnTopSystem(*k, *b, suggestedFncColor);
+
+    bottomSystem.invalidateButton();
+    cout << "FinishedCountGraientMap\n";
+}
+
 COLORREF MainLinLayout::getQuadraticDeltaColor(double quadraticDelta)
 {
-    const double maxQuadraticDelta = 204;
-    const double minQuadraticDelta = 0.03;
-    const double rangeDelta = maxQuadraticDelta - minQuadraticDelta;
+    const double _maxQuadraticDelta = 5000;
+    const double _minQuadraticDelta = 32;
+    const double rangeDelta = _maxQuadraticDelta - _minQuadraticDelta;
     const int r0 = 0;
     const int r1 = 255;
 
@@ -352,7 +419,7 @@ COLORREF MainLinLayout::getQuadraticDeltaColor(double quadraticDelta)
     const int b0 = 255;
     const int b1 = 0;
 
-    double t = (quadraticDelta - minQuadraticDelta) / rangeDelta;
+    double t = (quadraticDelta - _minQuadraticDelta) / rangeDelta;
 
     int r2 = (int)r0 + (int)((double)(r1 - r0) * t);
     int g2 = 0;
@@ -360,6 +427,16 @@ COLORREF MainLinLayout::getQuadraticDeltaColor(double quadraticDelta)
 
 
     COLORREF answer = RGB(r2, g2, b2);
+
+    if (quadraticDelta > maxQuadraticDelta)
+    {
+        //maxQuadraticDelta = quadraticDelta;
+    }
+    if (quadraticDelta < minQuadraticDelta)
+    {
+        //minQuadraticDelta = quadraticDelta;
+    }
+
     return answer;
 }
 
@@ -367,6 +444,15 @@ double MainLinLayout::calcQuadratic(double k, double b, double x, double(*fnc)(d
 {
     double dy = fnc(k, b, x) - originalFnc(x);
     return (dy * dy);
+}
+
+double MainLinLayout::calcQuadratic(double k, double b, size_t xIndex, double(*fnc)(double k, double b, double x), MultiLayCoordinatSystemWindow& lay)
+{
+    Vector originPoint = lay.getPoint(xIndex, originalLayIndex);
+
+    double dy = fnc(k, b, originPoint.x) - originPoint.y;
+
+    return dy * dy;
 }
 
 void MainLinLayout::countOriginalFnc()
@@ -383,7 +469,6 @@ void MainLinLayout::computeFncOnTopSystem(double k, double b, COLORREF _color/* 
     for (double x = topCellXBound.x; x < topCellXBound.y; x += xDelta)
     {
         if (!app->getAppCondition()) break;
-        double randomNoise = app->generateRandom(-1, 1, 2);
         double fncRes = sinFnc(k, b, x);
         Vector newPoint = { x, fncRes };
         topSystem.addPoint(newPoint, _color, 0, suggestedOddsLayIndex, false);
@@ -400,8 +485,8 @@ void MainLinLayout::computeOriginalFunction(double k, double b, COLORREF _color/
     for (double x = topCellXBound.x; x < topCellXBound.y; x += xDelta)
     {
         if (!app->getAppCondition()) break;
-        double randomNoise = app->generateRandom(-1, 1, 2);
-        double fncRes = sinFnc(k, b, x) + randomNoise;
+        double noise = 2 * sin(70 * x);
+        double fncRes = sinFnc(k, b, x) + noise;
         Vector newPoint = { x, fncRes };
         topSystem.addPoint(newPoint, _color, 0, originalLayIndex, false);
     }
@@ -433,7 +518,7 @@ void MainLinLayout::countGradientMap()
     Vector kBound = { 0, 10 }; //k = A - амплитуда идеальное A = 5
     Vector bBound = { 6.8, 7.2 }; // b = f - фаза  идеальное f = 7
     backGroundComputation.setText("Расчет градиента");
-    threadCoeffFinder(&answerK, &answerB, kBound, bBound, &MainLinLayout::sinFnc, &MainLinLayout::originalSinFnc);
+    threadCoeffFinderWithUnknownFnc(&answerK, &answerB, kBound, bBound, &MainLinLayout::sinFnc);
     backGroundComputation.setText("Нет фоновых задач");
     static char ans[MAX_PATH] = {};
     Vector answerVector = { answerK, answerB };
