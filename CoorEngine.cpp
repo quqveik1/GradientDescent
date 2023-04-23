@@ -6,6 +6,7 @@
 #include "CoordinatSystemWindow.cpp"
 #include "MainLinLayout.cpp"
 #include "ColorfullCoordinatSystemWindow.cpp"
+#include "resource.h"
 
 CoorEngine::CoorEngine() 
     : AbstractAppData(NULL, "..\\TESTWIN32_GRAPHICAPP\\x64\\Debug") 
@@ -27,4 +28,5 @@ void CoorEngine::onCreate(HWND window, UINT message, WPARAM wParam, LPARAM lPara
 void CoorEngine::setWindowParameters(HINSTANCE hInstance)
 {
     AbstractAppData::setWindowParameters(hInstance);
+    loadAndSetIcon(IDI_ICON1);
 }

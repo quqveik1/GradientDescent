@@ -12,6 +12,7 @@ struct MainLinLayout : LinearLayout
 {
     MultiLayCoordinatSystemWindow topSystem;
     MultiLayCoordinatSystemWindow bottomSystem;
+    COLORREF originalFncColor = C_LIGHTCYAN;
     COLORREF suggestedFncColor = C_LIGHTRED;
     COLORREF userSelectedFncColor = C_GREEN;
     Vector downLineSize = {};

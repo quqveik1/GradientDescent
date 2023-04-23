@@ -153,6 +153,16 @@
   <ItemGroup>
     <ClCompile Include="CoeffSelection.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="DevFiles\Logo.bmp" />
+    <Image Include="DevFiles\Logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CoeffSelection.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -25,6 +25,7 @@ OutputDir=C:\Users\Алехандро\Desktop\AlexProjects\GradientDescent\Installer
 OutputBaseFilename=GradientDescentScript
 Compression=lzma
 SolidCompression=yes
+SetupIconFile=C:\Users\Алехандро\Desktop\AlexProjects\GradientDescent\DevFiles\Logo.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

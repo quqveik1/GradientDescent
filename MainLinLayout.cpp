@@ -74,7 +74,7 @@ void MainLinLayout::initDescribtions()
     topDescribtion1.setFont(20);
     topDescribtion1.setWrapStatus(1);
     topDescribtion1.setFormat(DT_LEFT);
-    topDescribtion1.setText("Синий - оригинальный график");
+    topDescribtion1.setText("Голубой - оригинальный график с шумом");
     topDescribtions.addWindow(topDescribtion1);
 
     topDescribtion2.setColor(C_TRANSPARENT);
@@ -457,7 +457,7 @@ double MainLinLayout::calcQuadratic(double k, double b, size_t xIndex, double(*f
 
 void MainLinLayout::countOriginalFnc()
 {
-    computeOriginalFunction(currOriginalK, currOriginalB);
+    computeOriginalFunction(currOriginalK, currOriginalB, originalFncColor);
 };
 
 void MainLinLayout::computeFncOnTopSystem(double k, double b, COLORREF _color/* = NULL*/)
@@ -473,7 +473,7 @@ void MainLinLayout::computeFncOnTopSystem(double k, double b, COLORREF _color/* 
         Vector newPoint = { x, fncRes };
         topSystem.addPoint(newPoint, _color, 0, suggestedOddsLayIndex, false);
     }
-    invalidateButton();
+    topSystem.invalidateButton();
 }
 
 void MainLinLayout::computeOriginalFunction(double k, double b, COLORREF _color/* = NULL*/)
