@@ -40,3 +40,7 @@ K - ось абсцис, B - ось ординат.
 
 <img src="https://user-images.githubusercontent.com/64206443/182945554-ed4d18c6-a25d-4d0d-a331-e268643b3031.png" width="400">
 
+---
+- [EN](https://github.com/quqveik1/GradientDescent/blob/main/README_EN.md)
+- [DE](https://github.com/quqveik1/GradientDescent/blob/main/README_DE.md)
+
