@@ -1,14 +1,10 @@
 #pragma once
 #pragma once
 
-//#include "Q_Vector.h"
-//#include "TXLib.h"
 #include "..\..\TESTWIN32_GRAPHICAPP\Q_Vector.h"
 #include "..\..\TESTWIN32_GRAPHICAPP\Q_Rect.h"
 #include <math.h>
 #include <string.h>
-//#include "Config.h"
-//#include "Q_Ball.h"
 
 using namespace std;
 
@@ -23,10 +19,8 @@ struct coordinatSysConfig
     COLORREF axisColor;
 };
 
-
 class CoordinatSys
 {
-
 public:
     Rect pixRect;
     Vector coorSize_;
@@ -36,29 +30,27 @@ public:
     coordinatSysConfig config_;
     string xName;
     string yName;
-private: Rect   sysBorderPix_ = { startPosPix_, scalePix_ };
-       Vector lastNDelta = {};
+private: 
+    Rect   sysBorderPix_ = { startPosPix_, scalePix_ };
+    Vector lastNDelta = {};
 
-public: Vector intepretK_ = { 1, 1 }; //= scalePix / coorSize;
+public: 
+    Vector intepretK_ = { 1, 1 }; //= scalePix / coorSize;
 
-public: coordinatSys();
-public: coordinatSys(Vector startPosPix, Vector finishPosPix, Vector nullCoor);
-      Vector drawFunc(const char* func);
+    coordinatSys();
+    coordinatSys(Vector startPosPix, Vector finishPosPix, Vector nullCoor);
+    Vector drawFunc(const char* func);
 
-
-
-      //public: Vector drawCircle (Ball ball);
-public: Vector drawCircle(const Vector& vector, double r = 10);
-      void drawLine(Vector startLPos, Vector finishLPos, COLORREF color = 1);
-      Vector interpret(Vector vector);
-      Vector convertFromPixels(Vector vector);
-      void drawAxis(Vector nDelta);
-      void clean();
-      Vector getXBound();
-      Vector getYBound();
+    Vector drawCircle(const Vector& vector, double r = 10);
+    void drawLine(Vector startLPos, Vector finishLPos, COLORREF color = 1);
+    Vector interpret(Vector vector);
+    Vector convertFromPixels(Vector vector);
+    void drawAxis(Vector nDelta);
+    void clean();
+    Vector getXBound();
+    Vector getYBound();
 
 };
-
 
 coordinatSys::coordinatSys(Vector startPosPix, Vector finishPosPix, Vector nullCoor) :
     startPosPix_(startPosPix),
@@ -81,38 +73,6 @@ coordinatSys::coordinatSys() :
     intepretK_.y = -1;
 }
 
-/*
-Vector coordinatSys::drawCircle (Ball ball)
-{
-    //Vector intepretK = {}; //= scalePix / coorSize;
-
-    //intepretK.x = scalePix.x / coorSize.x;
-    //intepretK.y = scalePix.y / coorSize.y;
-
-    Vector pixPos = interpret (ball.pos);
-
-    double rScale = (intepretK_.x + intepretK_.y) / 2;
-
-    //$s
-    txSetFillColor (ball.color);
-
-    //if (pixPos.x > sysBorderPix_.left () && pixPos.y > sysBorderPix_.top () && pixPos.x < sysBorderPix_.right () && pixPos.y < sysBorderPix_.bottom ())
-    if (pixPos.x < (startPosPix_.x + scalePix_.x) && pixPos.x > startPosPix_.x)
-    {
-        if (pixPos.y < (startPosPix_.y + scalePix_.y) && pixPos.y > startPosPix_.y)
-        {
-            txCircle (pixPos.x, pixPos.y, ball.r * rScale);
-        }
-    }
-    //_getch ();
-
-    return pixPos;
-
-}
-*/
-
-
-
 void coordinatSys::drawLine(Vector startLPos, Vector finishLPos, COLORREF color)
 {
     Vector startLPixPos = interpret(startLPos);
@@ -127,48 +87,12 @@ void coordinatSys::drawLine(Vector startLPos, Vector finishLPos, COLORREF color)
 
 }
 
-/*
-Vector coordinatSys::drawFunc (const char *func)
-{
-    int l = strlen (func);
-    double y = 0;
-    int temp = 0;
-
-    for (int x = 0; x < (finishPosPix_ - nullCoor_).x; x++)
-    {
-
-        for (int i = 0; i < l; i++)
-        {
-            if (func[i] == 'x')
-            {
-                if (func[i + 1] == '^')
-                {
-                    sscanf ((char *)func[i + 2], "%lf", temp);
-                    y += pow (x, temp);
-                }
-                if (func[i + 1] == '*')
-                {
-                    sscanf ((char *)func[i + 2], "%lf", temp);
-                }
-            }
-        }
-    }
-}
-*/
-
-
 Vector coordinatSys::drawCircle(const Vector& vector, double r/* = 1*/)
 {
-    //Vector intepretK = {}; //= scalePix / coorSize;
-
-    //intepretK.x = scalePix.x / coorSize.x;
-    //intepretK.y = scalePix.y / coorSize.y;
-
     Vector pixPos = interpret(vector);
 
-    double rScale = 1;//(intepretK_.x + intepretK_.y) / 2;
+    double rScale = 1;
 
-    //if (pixPos.x > sysBorderPix_.left() && pixPos.y > sysBorderPix_.top() && pixPos.x < sysBorderPix_.right() && pixPos.y < sysBorderPix_.bottom())
     if (pixPos < finishPosPix_)
     {
         if (pixPos > startPosPix_)
@@ -178,7 +102,6 @@ Vector coordinatSys::drawCircle(const Vector& vector, double r/* = 1*/)
     }
 
     return pixPos;
-
 }
 
 void coordinatSys::clean()
@@ -201,20 +124,11 @@ void coordinatSys::drawAxis(Vector nDelta)
     drawArrows({ finishPosPix_.x - startPosPix_.x, -nullCoor_.y + nullCoor_.y }, { finishPosPix_.x, nullCoor_.y });
     txSetColor(RGB(200, 200, 200), 1);
 
-
-
-    /*
-    Vector roundDelta = {(humanRound ($((($ (finishPosPix_.x) - $ (startPosPix_.x)) * $ (intepretK_.x)) / $ (nDelta.x)))),
-                         (humanRound ($((($ (finishPosPix_.y) - $ (startPosPix_.y)) * $ (intepretK_.y)) / $ (nDelta.y))))
-                        };
-                        */
-
     Vector roundDelta = { (humanRound(((((finishPosPix_.x) - (startPosPix_.x))) / (nDelta.x)))),
                          (humanRound(((((finishPosPix_.y) - (startPosPix_.y))) / (nDelta.y))))
     };
 
     char text[20] = {};
-
 
     txSelectFont("Arial", config_.font);
 
@@ -236,8 +150,6 @@ void coordinatSys::drawAxis(Vector nDelta)
 
         num.x += roundDelta.x;
     }
-
-    //txTextOut (nullCoor_.x + ((num.x - roundDelta.x) * intepretK_.x), nullCoor_.y, text);
 
     for (int y = 0; y < nDelta.y * 10; y++)
     {
@@ -274,7 +186,6 @@ void coordinatSys::drawAxis(Vector nDelta)
         txSetFillColor(TX_BLACK);
         txTextOut(nullCoor_.x - 5, startPosPix_.y, yName);
     }
-
 }
 
 void drawArrows(const Vector& mainVector, const Vector& finishPoint)
@@ -301,7 +212,6 @@ Vector makePerpendikularLine(const Vector& mainVector)
     return perpendikularLine;
 }
 
-
 double humanRound(double delta)
 {
     /*
@@ -323,14 +233,9 @@ double humanRound(double delta)
     *
     */
 
-    //printf ("\n::%d::\n", delta);
     delta = fabs(delta);
     double exp = log10(delta);
     double mantissa = delta / (pow(10, ceil(exp)));
-
-    //double mantissa = frexp (delta, &order);
-
-    //printf ("Delta: %lf\tExp: %lf \tMantissa: %lf\n", delta, exp, mantissa);
 
     if (mantissa < 0.15) mantissa = 0.1;
     if (0.15 <= mantissa && mantissa < 0.23) mantissa = 0.2;
@@ -338,12 +243,8 @@ double humanRound(double delta)
     if (0.35 <= mantissa && mantissa < 0.65) mantissa = 0.5;
     if (0.65 <= mantissa && mantissa <= 1)   mantissa = 1;
 
-    //printf ("delta: %lf, fDelta: %lf\n", delta, mantissa * pow (10, ceil(exp)));
-
-
     return mantissa * pow(10, ceil(exp));
 }
-
 
 Vector coordinatSys::interpret(Vector vector)
 {
@@ -357,9 +258,6 @@ Vector coordinatSys::convertFromPixels(Vector vector)
     return answer;
 }
 
-
-
-
 Vector coordinatSys::getXBound()
 {
     Vector minAnswer = convertFromPixels(startPosPix_);
@@ -371,7 +269,6 @@ Vector coordinatSys::getXBound()
     return answer;
 }
 
-
 Vector coordinatSys::getYBound()
 {
     Vector minAnswer = convertFromPixels(startPosPix_);
@@ -382,4 +279,3 @@ Vector coordinatSys::getYBound()
     answer.y = std::max(minAnswer.y, maxAnswer.y);
     return answer;
 }
-

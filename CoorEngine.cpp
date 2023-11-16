@@ -8,6 +8,7 @@
 #include "ColorfullCoordinatSystemWindow.cpp"
 #include "resource.h"
 
+
 CoorEngine::CoorEngine() 
     : AbstractAppData(NULL, "..\\TESTWIN32_GRAPHICAPP\\x64\\Debug") 
 {
@@ -23,7 +24,6 @@ void CoorEngine::onCreate(HWND window, UINT message, WPARAM wParam, LPARAM lPara
     mainLayout->setMatchParent(true);
     mainWnd->addWindow(mainLayout);
 }
-
 
 void CoorEngine::setWindowParameters(HINSTANCE hInstance)
 {

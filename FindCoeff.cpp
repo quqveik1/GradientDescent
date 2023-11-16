@@ -40,16 +40,14 @@ void findBestCoeff(coordinatSys& deltaSys, double* k, double* b, Vector& kBound,
             maxQuadraticDelta = currQuadraticDelta;
         }
 
-        //printf("currQuadraticDelta: %lf | k: %lf, b: %lf\n", currQuadraticDelta, _k, _b);
         COLORREF quadraticDeltaColor = getQuadraticDeltaColor(currQuadraticDelta);
         txSetColor(quadraticDeltaColor);
         txSetFillColor(quadraticDeltaColor);
         Vector point = { _k, _b};
         deltaSys.drawCircle(point, 2);
     }
-    
-
 }
+
 //x0 + (x1 - x0) * t
 COLORREF getQuadraticDeltaColor(double quadraticDelta)
 {
@@ -82,8 +80,6 @@ double calcQuadratic(double k, double b, double x, double(*fnc)(double k, double
     return (dy * dy);
 }
 
-
-
 void drawBestCoeff(coordinatSys& sys, double k, double b, Vector& xBound, double(*fnc)(double k, double b, double x), COLORREF color)
 {
     double xDelta = abs(xBound.delta() / 1000);
@@ -96,7 +92,6 @@ void drawBestCoeff(coordinatSys& sys, double k, double b, Vector& xBound, double
         point.y = fnc(k, b, x);
         sys.drawCircle(point, 2);
     }
-
 }
 
 void findAndDrawBestCoeff(coordinatSys& sys, coordinatSys& deltaSys, double(*fnc)(double k, double b, double x), double (*originalFnc)(double x), double* findedK, double* findedB, Vector& kBound, Vector& bBound, Vector& xBound, COLORREF color)

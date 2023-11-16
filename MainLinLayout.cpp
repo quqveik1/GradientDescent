@@ -45,14 +45,12 @@ void MainLinLayout::initCoordinats()
     topSystem.setAxisYName("Y");
 
     LinearLayoutInfo* topInfo = new LinearLayoutInfo();
-    //static LinearLayoutInfo topInfo;
     topInfo->margin = Rect{ 0, 0, 0, 10 };
     topSystem.setLayoutInfo(topInfo);
 
     topSystem.setMatchParentX(true);
     topSystem.addLay();
     addWindow(topSystem);
-
 
     bottomSystem.setCellNull({ 0, 6.8 });
     bottomSystem.setCCells({ 12, 0.5 });
@@ -112,7 +110,6 @@ void MainLinLayout::initDescribtions()
     bottomDescribtions.addWindow(bottomDescribtion2);
 }
 
-
 void MainLinLayout::initDownLinLayout()
 {
     addWindow(downLinLayout);
@@ -150,11 +147,7 @@ void MainLinLayout::draw()
 
     int timeAfter = clock();
     int delta = timeAfter - timeBefore;
-
-    //cout << "Рисование заняло: " << delta << "мс\n";
 }
-
-
 
 void MainLinLayout::onMessageRecieve(const char* name, void* data)
 {
@@ -168,15 +161,8 @@ void MainLinLayout::onMessageRecieve(const char* name, void* data)
         
         thread gradientDescentThread(&MainLinLayout::startGradientDescent, this, clickedCellPos);
         gradientDescentThread.detach();
-
-        /*
-        scoped_lock lock1(maxQuadraticDeltaMutex);
-        changeAndPrintNewMaxOrMinDelta(&maxQuadraticDelta, clickedQuadraticDelta, &maxQuadraticDeltaIndex, maxDeltaColor);
-        */
     }
-
 }
-
 
 void MainLinLayout::startGradientDescent(Vector _startPos)
 {
@@ -228,11 +214,7 @@ int MainLinLayout::onSize(Vector managerSize, Rect _newRect)
     downLineSize = _size * 0.1;
     downLineSize.x = _size.x;
 
-
-
     topSystem.onSize(_size, { 0, 0, topSystem.getSize().x, (_size.y - downLineSize.y) * 0.5 });
-
-
 
     bottomSystem.onSize(_size, { 0, 0, bottomSystem.getSize().x, (_size.y - downLineSize.y) * 0.5 });                                                                                                                     
 
@@ -374,7 +356,6 @@ void MainLinLayout::threadCoeffFinderWithUnknownFnc(double* k, double* b, Vector
 
     int finishPos = (int)topSystem.getCoordinatLay(originalLayIndex)->size();
 
-
     for (int i = 0; i < cCountingCoef; i++)
     {
         if (!app->getAppCondition()) break;
@@ -427,15 +408,6 @@ COLORREF MainLinLayout::getQuadraticDeltaColor(double quadraticDelta)
 
 
     COLORREF answer = RGB(r2, g2, b2);
-
-    if (quadraticDelta > maxQuadraticDelta)
-    {
-        //maxQuadraticDelta = quadraticDelta;
-    }
-    if (quadraticDelta < minQuadraticDelta)
-    {
-        //minQuadraticDelta = quadraticDelta;
-    }
 
     return answer;
 }
@@ -491,38 +463,33 @@ void MainLinLayout::computeOriginalFunction(double k, double b, COLORREF _color/
         topSystem.addPoint(newPoint, _color, 0, originalLayIndex, false);
     }
     invalidateButton();
-
 }
-
 
 void MainLinLayout::startMonteCarloComputation()
 {
     int timeStart = clock();
 
-    //countGradientMap();
     countOriginalFnc();
     countGradientMap();
-    //thread executeThread(&MainLinLayout::countGradientMap, this);
-    //executeThread.detach();
 
     int timeFinish = clock();
 
     int delta = timeFinish - timeStart;
-
-    //cout << "Подсчет всех точек занял: " << delta << "мс\n";
 }
 
 void MainLinLayout::countGradientMap()
 {
     double k = 0, b = 0;
-    Vector kBound = { 0, 10 }; //k = A - амплитуда идеальное A = 5
+    Vector kBound = { 0,   10  }; //k = A - амплитуда идеальное A = 5
     Vector bBound = { 6.8, 7.2 }; // b = f - фаза  идеальное f = 7
     backGroundComputation.setText("Расчет градиента");
     threadCoeffFinderWithUnknownFnc(&answerK, &answerB, kBound, bBound, &MainLinLayout::sinFnc);
     backGroundComputation.setText("Нет фоновых задач");
+
     static char ans[MAX_PATH] = {};
     Vector answerVector = { answerK, answerB };
     sprintf(ans, "Отгаданный Коэффициент: %s", answerVector.getStr());
+
     answerCoeff.setText(ans);
     invalidateButton();
 }
